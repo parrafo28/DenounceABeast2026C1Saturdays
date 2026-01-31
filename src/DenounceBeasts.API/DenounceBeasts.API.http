@@ -1,0 +1,6 @@
+@DenounceBeasts.API_HostAddress = http://localhost:5042
+
+GET {{DenounceBeasts.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
