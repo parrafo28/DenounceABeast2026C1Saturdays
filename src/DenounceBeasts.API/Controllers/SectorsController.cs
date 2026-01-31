@@ -9,18 +9,40 @@ namespace DenounceBeasts.API.Controllers
     {
         private static readonly List<Sector> _sectors = new List<Sector>
         {
-            new Sector { Id = 1, Name = "Zona Colonial", PostalCode = "1", IsActive = true },
-            new Sector { Id = 2, Name = "Gascue", PostalCode = "1", IsActive = true },
-            new Sector { Id = 3, Name = "Cienfuegos", PostalCode = "2", IsActive = true }
+            new Sector { Id = 1, Name = "Zona Colonial", PostalCode = "1", IsActive = true, MunicipalityId = 1 },
+            new Sector { Id = 2, Name = "Gascue", PostalCode = "1", IsActive = true , MunicipalityId = 1},
+            new Sector { Id = 3, Name = "Cienfuegos", PostalCode = "2", IsActive = true, MunicipalityId = 3 }
         };
 
-        [HttpGet]  
-        public ActionResult<IEnumerable<Sector>> GetAll()
+        [HttpGet]
+        public ActionResult<IEnumerable<SectorDto>> GetAll()
         {
-            return Ok(_sectors);
+            //var sectors = new List<SectorDto>();
+            //foreach (var sector in _sectors)
+            //{
+            //    sectors.Add(new SectorDto
+            //    {
+            //        Id = sector.Id,
+            //        Name = sector.Name,
+            //        PostalCode = sector.PostalCode,
+            //        IsActive = sector.IsActive,
+            //        MunicipalityId = sector.MunicipalityId
+            //    });
+            //}
+
+            var response = _sectors.Select(s => new SectorDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                PostalCode = s.PostalCode,
+                IsActive = s.IsActive,
+                MunicipalityId = s.MunicipalityId
+            }).ToList();
+
+            return Ok(response);
         }
 
-        [HttpGet("{id}")]  
+        [HttpGet("{id}")]
         public ActionResult<Sector> GetById(int id)
         {
             var sector = _sectors.FirstOrDefault(s => s.Id == id);
@@ -29,34 +51,46 @@ namespace DenounceBeasts.API.Controllers
             return Ok(sector);
         }
 
-        [HttpPost]  
-        public ActionResult<Sector> Create(Sector sector)
+        [HttpPost]
+        public ActionResult<Sector> Create(SectorDto request)
         {
-            if (string.IsNullOrWhiteSpace(sector.Name))
+            if (string.IsNullOrWhiteSpace(request.Name))
             {
                 return BadRequest("Name of sector is required.");
             }
-             
+
             int newId = _sectors.Any() ? _sectors.Max(s => s.Id) + 1 : 1;
-            sector.Id = newId; 
-            sector.IsActive = true;  
+            request.Id = newId;
+            request.IsActive = true;
+
+            var sector = new Sector
+            {
+                Id = request.Id,
+                Name = request.Name,
+                PostalCode = request.PostalCode,
+                IsActive = request.IsActive,
+                MunicipalityId = request.MunicipalityId,
+                Created = DateTime.Now,
+                Updated = DateTime.Now
+            };
+
             _sectors.Add(sector);
-            return CreatedAtAction(nameof(GetById), new { id = sector.Id }, sector);
+            return CreatedAtAction(nameof(GetById), new { id = request.Id }, request);
         }
 
-        [HttpPut("{id}")]  
-        public IActionResult Update(int id, Sector sector)
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, SectorDto request)
         {
             var existing = _sectors.FirstOrDefault(s => s.Id == id);
             if (existing == null)
                 return NotFound();
-            existing.Name = sector.Name;
-            existing.PostalCode = sector.PostalCode;
-            existing.IsActive = sector.IsActive;
+            existing.Name = request.Name;
+            existing.PostalCode = request.PostalCode;
+            existing.IsActive = request.IsActive;
             return NoContent();
         }
 
-        [HttpDelete("{id}")] 
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var existing = _sectors.FirstOrDefault(s => s.Id == id);

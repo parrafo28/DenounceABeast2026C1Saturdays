@@ -1,4 +1,6 @@
-﻿namespace DenounceBeasts.API.Models
+﻿using System.Text.Json.Serialization;
+
+namespace DenounceBeasts.API.Models
 {
     public class Municipality
     {
@@ -7,5 +9,8 @@
         public string PostalCode { get; set; } = string.Empty;
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
+        public bool IsActive { get; set; }
+
+        public List<Sector> Sectors { get; set; }
     }
 }

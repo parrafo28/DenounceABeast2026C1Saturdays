@@ -5,15 +5,15 @@ namespace DenounceBeasts.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MunicipalitiesController: ControllerBase
+    public class MunicipalitiesController : ControllerBase
     {
 
         private static List<Municipality> _municipalities = new List<Municipality>()
             {
-                new Municipality{ Id = 1, Name = "Municipality A", PostalCode="1251", Created= DateTime.Now.AddDays(-8), Updated= DateTime.Now.AddDays(-6)  },
-                new Municipality{ Id = 2, Name = "Municipality A.1", PostalCode="54654", Created= DateTime.Now.AddDays(-5), Updated= DateTime.Now.AddDays(-2)  },
-                new Municipality{ Id = 3, Name = "Municipality B", PostalCode="546", Created= DateTime.Now.AddDays(-10), Updated= DateTime.Now.AddDays(-4)  }
-            };  
+                new Municipality{ Id = 1, Name = "Municipality A", PostalCode="1251", Created= DateTime.Now.AddDays(-8), Updated= DateTime.Now.AddDays(-6) , IsActive= true },
+                new Municipality{ Id = 2, Name = "Municipality A.1", PostalCode="54654", Created= DateTime.Now.AddDays(-5), Updated= DateTime.Now.AddDays(-2), IsActive = true  },
+                new Municipality{ Id = 3, Name = "Municipality B", PostalCode="546", Created= DateTime.Now.AddDays(-10), Updated= DateTime.Now.AddDays(-4) , IsActive=false }
+            };
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
@@ -28,7 +28,7 @@ namespace DenounceBeasts.API.Controllers
 
         [HttpGet]
         public IActionResult Get()
-        { 
+        {
             //var municipalities = new List<Municipality>()
             //{
             //    new Municipality{ Id = 1, Name = "Municipality A" },
@@ -48,7 +48,7 @@ namespace DenounceBeasts.API.Controllers
             return Ok(_municipalities);
         }
 
-        [HttpGet("Get2")] 
+        [HttpGet("Get2")]
         public IActionResult Getx()
         {
             //var municipalities = new List<Municipality>()
