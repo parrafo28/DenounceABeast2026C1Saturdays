@@ -1,4 +1,7 @@
-﻿using DenounceBeasts.API.Models;
+﻿using DenounceBeasts.API.Data;
+using DenounceBeasts.API.Data.Entities;
+using DenounceBeasts.API.Models;
+using DenounceBeasts.API.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DenounceBeasts.API.Controllers
@@ -7,30 +10,19 @@ namespace DenounceBeasts.API.Controllers
     [Route("api/sectors")]
     public class SectorsController : ControllerBase
     {
-        private static readonly List<Sector> _sectors = new List<Sector>
+        private readonly ApplicationDataContext _context;
+
+        public SectorsController(ApplicationDataContext context)
         {
-            new Sector { Id = 1, Name = "Zona Colonial", PostalCode = "1", IsActive = true, MunicipalityId = 1 },
-            new Sector { Id = 2, Name = "Gascue", PostalCode = "1", IsActive = true , MunicipalityId = 1},
-            new Sector { Id = 3, Name = "Cienfuegos", PostalCode = "2", IsActive = true, MunicipalityId = 3 }
-        };
+            _context = context;
+        }
 
         [HttpGet]
         public ActionResult<IEnumerable<SectorDto>> GetAll()
         {
-            //var sectors = new List<SectorDto>();
-            //foreach (var sector in _sectors)
-            //{
-            //    sectors.Add(new SectorDto
-            //    {
-            //        Id = sector.Id,
-            //        Name = sector.Name,
-            //        PostalCode = sector.PostalCode,
-            //        IsActive = sector.IsActive,
-            //        MunicipalityId = sector.MunicipalityId
-            //    });
-            //}
+            var sectors = _context.Sectors.ToList();
 
-            var response = _sectors.Select(s => new SectorDto
+            var response = sectors.Select(s => new SectorDto
             {
                 Id = s.Id,
                 Name = s.Name,
@@ -43,60 +35,85 @@ namespace DenounceBeasts.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Sector> GetById(int id)
-        {
-            var sector = _sectors.FirstOrDefault(s => s.Id == id);
+        public IActionResult GetById([FromQuery] int id)
+        {  
+            var sector = _context.Sectors.FirstOrDefault(s => s.Id == id);
             if (sector == null)
                 return NotFound();
-            return Ok(sector);
+
+            var response = new SectorDto
+            {
+                Id = sector.Id,
+                Name = sector.Name,
+                PostalCode = sector.PostalCode,
+                IsActive = sector.IsActive,
+                MunicipalityId = sector.MunicipalityId
+
+                
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public ActionResult<Sector> Create(SectorDto request)
+        public ActionResult<Sector> Create([FromBody] SectorCreateDto request)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
             {
                 return BadRequest("Name of sector is required.");
             }
-
-            int newId = _sectors.Any() ? _sectors.Max(s => s.Id) + 1 : 1;
-            request.Id = newId;
-            request.IsActive = true;
+             
 
             var sector = new Sector
             {
-                Id = request.Id,
                 Name = request.Name,
                 PostalCode = request.PostalCode,
-                IsActive = request.IsActive,
+                IsActive = true,
                 MunicipalityId = request.MunicipalityId,
-                Created = DateTime.Now,
-                Updated = DateTime.Now
+                //Created = DateTime.Now,
+                //Updated = DateTime.Now
             };
 
-            _sectors.Add(sector);
-            return CreatedAtAction(nameof(GetById), new { id = request.Id }, request);
+            _context.Add(sector);
+            _context.SaveChanges();
+
+            return Ok(new { id = sector.Id });
+
+            //return CreatedAtAction(nameof(GetById), new { id = sector.Id }, sector);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, SectorDto request)
+        public IActionResult Update([FromRoute]int id, [FromBody] SectorUpdateDto request)
         {
-            var existing = _sectors.FirstOrDefault(s => s.Id == id);
+            if(id != request.Id)
+            {
+                return BadRequest("ID in URL does not match ID in request body.");
+            }
+
+            var existing = _context.Sectors.FirstOrDefault(s => s.Id == id);
             if (existing == null)
                 return NotFound();
+
             existing.Name = request.Name;
             existing.PostalCode = request.PostalCode;
             existing.IsActive = request.IsActive;
+            existing.MunicipalityId = request.MunicipalityId; 
+            //existing.Updated = DateTime.Now;
+
+            _context.Update(existing);
+            _context.SaveChanges();
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete([FromBody] SectorDeleteDto request)
         {
-            var existing = _sectors.FirstOrDefault(s => s.Id == id);
+            var existing = _context.Sectors.FirstOrDefault(s => s.Id == request.Id);
             if (existing == null)
                 return NotFound();
-            _sectors.Remove(existing);
+            _context.Remove(existing);
+            _context.SaveChanges();
             return NoContent();
         }
     }
