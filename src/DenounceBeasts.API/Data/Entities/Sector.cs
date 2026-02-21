@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DenounceBeasts.API.Data.Entities
 {
+    //[Table("Sector")]
     public class Sector
     {
         [Key]
@@ -23,5 +24,9 @@ namespace DenounceBeasts.API.Data.Entities
         [Range(1, 100)]
         public int MunicipalityId { get; set; }
         public Municipality Municipality { get; set; }
+
+        //[NotMapped]
+        //public string MyPropertyForTestInDeb { get; set; }
+
     }
 }

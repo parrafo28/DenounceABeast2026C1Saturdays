@@ -9,5 +9,7 @@
 
         public int MunicipalityId { get; set; } 
         public MunicipalityDto Municipality { get; set; }
+
+        //public string MyPropertyForTest { get; set; }
     }
 }
